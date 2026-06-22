@@ -879,12 +879,18 @@
 + (void)disableTools:(NSArray<id> *)toolsToDisable documentController:(PTDocumentController *)documentController
 {
     PTToolManager *toolManager = documentController.toolManager;
+    NSMutableArray<Class> *classesToDisable = [NSMutableArray array];
     
     for (id item in toolsToDisable) {
         BOOL value = NO;
         
         if ([item isKindOfClass:[NSString class]]) {
             NSString *string = (NSString *)item;
+            
+            Class toolClass = [PdftronFlutterPlugin toolClassForKey:string];
+            if (toolClass) {
+                [classesToDisable addObject:toolClass];
+            }
             
             if ([string isEqualToString:PTAnnotationEditToolKey] ||
                 [string isEqualToString:PTEditToolButtonKey] ||
@@ -1025,6 +1031,27 @@
             else if ([string isEqualToString:PTAnnotationSmartPenToolKey]) {
                 toolManager.smartPenEnabled = value;
             }
+            else if ([string isEqualToString:PTAnnotationSmartHighlighterToolKey]) {
+                if ([toolManager respondsToSelector:@selector(setSmartHighlighterEnabled:)]) {
+                    toolManager.smartHighlighterEnabled = value;
+                }
+            }
+        }
+    }
+    
+    if (classesToDisable.count > 0 && documentController.toolGroupManager) {
+        for (PTToolGroup *group in documentController.toolGroupManager.groups) {
+            NSMutableArray<UIBarButtonItem *> *newItems = [NSMutableArray array];
+            for (UIBarButtonItem *item in group.barButtonItems) {
+                if ([item isKindOfClass:[PTToolBarButtonItem class]]) {
+                    PTToolBarButtonItem *toolBarItem = (PTToolBarButtonItem *)item;
+                    if ([classesToDisable containsObject:toolBarItem.toolClass]) {
+                        continue; // Skip the disabled tool
+                    }
+                }
+                [newItems addObject:item];
+            }
+            group.barButtonItems = newItems;
         }
     }
 }
@@ -3865,6 +3892,9 @@
     }
     else if ([key isEqualToString:PTAnnotationSmartPenToolKey]) {
         return [PTSmartPen class];
+    }
+    else if ([key isEqualToString:PTAnnotationSmartHighlighterToolKey]) {
+        return NSClassFromString(@"PTSmartHighlighter");
     }
     else if ([key isEqualToString:PTPencilKitDrawingToolKey]) {
         return [PTPencilDrawingCreate class];

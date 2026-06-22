@@ -120,6 +120,7 @@ static NSString * const PTFormCreateComboBoxFieldToolKey = @"FormCreateComboBoxF
 static NSString * const PTFormCreateListBoxFieldToolKey = @"FormCreateListBoxField";
 static NSString * const PTPencilKitDrawingToolKey = @"PencilKitDrawing";
 static NSString * const PTAnnotationSmartPenToolKey = @"AnnotationSmartPen";
+static NSString * const PTAnnotationSmartHighlighterToolKey = @"AnnotationSmartHighlighter";
 static NSString * const PTPanToolKey = @"Pan";
 
 // button
